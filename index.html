@@ -3,47 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>مختبر المغناطيس </title>
+    <title>مختبر عبدالله كريري الذكي</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Cairo', sans-serif;
-            background-color: #f0f9ff;
+            background-color: #f1f5f9;
             overflow: hidden;
             touch-action: none;
             user-select: none;
             margin: 0;
-            padding: 0;
             height: 100vh;
             width: 100vw;
         }
-        #game-container {
+        #game-area {
             width: 100%;
             height: 100%;
             position: relative;
             background-image: 
-                radial-gradient(circle, #bae6fd 1px, transparent 1px),
-                linear-gradient(to right, #f1f5f9 1px, transparent 1px),
-                linear-gradient(to bottom, #f1f5f9 1px, transparent 1px);
-            background-size: 20px 20px, 40px 40px, 40px 40px;
+                linear-gradient(rgba(148, 163, 184, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(148, 163, 184, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
         }
         
         .magnet {
-            width: 130px;
-            height: 45px;
+            width: 160px;
+            height: 60px;
             display: flex;
             cursor: grab;
             position: absolute;
-            z-index: 10;
-            filter: drop-shadow(0 6px 8px rgba(0,0,0,0.25));
-            touch-action: none;
-            transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        @media (min-width: 768px) {
-            .magnet { width: 180px; height: 60px; }
+            z-index: 50;
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2));
+            border-radius: 12px;
+            transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            will-change: transform, left, top;
         }
 
         .pole {
@@ -53,335 +47,283 @@
             justify-content: center;
             color: white;
             font-weight: 900;
-            font-size: 1.4rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
-        }
-        .pole-n { background: linear-gradient(135deg, #f87171, #991b1b); border-right: 2px solid rgba(0,0,0,0.1); }
-        .pole-s { background: linear-gradient(135deg, #60a5fa, #1e40af); border-left: 2px solid rgba(0,0,0,0.1); }
-        
-        .items-shelf {
-            position: absolute;
-            bottom: 110px;
-            width: 90%;
-            left: 5%;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(5px);
-            border-radius: 24px;
-            padding: 15px;
-            border: 2px dashed #cbd5e1;
+            font-size: 1.8rem;
             pointer-events: none;
         }
+        .pole-n { background: linear-gradient(135deg, #ef4444, #991b1b); border-radius: 0 12px 12px 0; }
+        .pole-s { background: linear-gradient(135deg, #3b82f6, #1e40af); border-radius: 12px 0 0 12px; }
+        
         .item {
-            width: 50px;
-            height: 50px;
-            font-size: 2.2rem;
+            width: 65px;
+            height: 65px;
+            font-size: 3rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            z-index: 5;
-            pointer-events: auto;
-            transition: transform 0.2s;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+            cursor: grab;
+            position: absolute;
+            z-index: 10;
+            will-change: left, top;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .item:active { transform: scale(1.2); }
-        .item.attached { position: absolute; z-index: 15; transition: none; }
-        
-        .speech-bubble {
+
+        .item.locked {
+            z-index: 60;
+            transition: none;
+        }
+
+        .ui-panel {
             position: absolute;
             top: 20px;
             left: 50%;
             transform: translateX(-50%);
             background: white;
-            padding: 12px 24px;
-            border-radius: 30px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-            width: 85%;
-            max-width: 400px;
+            padding: 15px 30px;
+            border-radius: 50px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             border: 4px solid #3b82f6;
             z-index: 100;
+            width: 90%;
+            max-width: 550px;
+            pointer-events: none;
         }
 
         .controls {
             position: absolute;
-            bottom: 20px;
+            bottom: 30px;
             width: 100%;
             display: flex;
             justify-content: center;
-            gap: 10px;
-            padding: 0 15px;
-            z-index: 100;
+            gap: 15px;
+            padding: 0 20px;
         }
-        .btn-game {
-            padding: 12px;
-            border-radius: 16px;
-            font-weight: 800;
+        
+        .btn {
+            padding: 14px 24px;
+            border-radius: 20px;
             color: white;
-            font-size: 0.85rem;
+            font-weight: 900;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.2);
+            transition: all 0.1s;
             flex: 1;
-            max-width: 120px;
-            transition: all 0.2s;
-            box-shadow: 0 4px 0 rgba(0,0,0,0.15);
+            max-width: 150px;
+            text-align: center;
         }
-        .btn-game:active { transform: translateY(3px); box-shadow: none; }
+        .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.2); }
 
-        @keyframes spark {
-            0% { transform: scale(0); opacity: 1; }
-            100% { transform: scale(2); opacity: 0; }
-        }
-        .spark {
+        .sparkle {
             position: absolute;
-            width: 20px;
-            height: 20px;
-            background: #fde047;
+            width: 10px;
+            height: 10px;
+            background: #fbbf24;
             border-radius: 50%;
             pointer-events: none;
-            z-index: 50;
-            animation: spark 0.4s ease-out forwards;
+            z-index: 200;
+            animation: spark 0.5s ease-out forwards;
+        }
+        @keyframes spark {
+            to { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
+        }
+
+        .shake { animation: shake-anim 0.2s infinite; }
+        @keyframes shake-anim {
+            0% { transform: translate(0,0); }
+            50% { transform: translate(-3px, 2px); }
+            100% { transform: translate(3px, -2px); }
         }
     </style>
 </head>
 <body>
 
-<div id="game-container">
-    <div class="speech-bubble text-center">
-        <h2 class="text-xl font-black text-blue-700 mb-1">مختبر عبدالله حسن الخارق ⚡</h2>
-        <p id="hint-text" class="text-sm font-bold text-slate-600">اكتشف قوة المغناطيس المذهلة!</p>
+<div id="game-area">
+    <div class="ui-panel text-center">
+        <h2 class="text-xl font-black text-blue-700">مختبر عبدالله كريري الذكي 🧪</h2>
+        <p id="status" class="text-sm font-bold text-slate-500">استكشف قوة الجذب المغناطيسي المذهلة!</p>
     </div>
 
-    <div id="mag1" class="magnet" style="top: 30%; left: 10%;">
-        <div class="pole pole-s">S</div>
-        <div class="pole pole-n">N</div>
+    <!-- المغناطيسات -->
+    <div id="mag1" class="magnet" style="top: 30%; left: 15%;">
+        <div class="pole pole-s">ج</div>
+        <div class="pole pole-n">ش</div>
     </div>
 
     <div id="mag2" class="magnet" style="top: 30%; left: 60%;">
-        <div class="pole pole-s">S</div>
-        <div class="pole pole-n">N</div>
+        <div class="pole pole-s">ج</div>
+        <div class="pole pole-n">ش</div>
     </div>
 
-    <div class="items-shelf">
-        <div class="item" data-name="مشبك" data-magnetic="true" style="position:relative">📎</div>
-        <div class="item" data-name="مفتاح" data-magnetic="true" style="position:relative">🔑</div>
-        <div class="item" data-name="مسمار" data-magnetic="true" style="position:relative">🔩</div>
-        <div class="item" data-name="عملة" data-magnetic="true" style="position:relative">🪙</div>
-        <div class="item" data-name="كرة صوف" data-magnetic="false" style="position:relative">🧶</div>
-        <div class="item" data-name="قلم" data-magnetic="false" style="position:relative">✏️</div>
-    </div>
+    <!-- القطع -->
+    <div class="item" style="bottom: 120px; left: 10%;" data-magnetic="true">📎</div>
+    <div class="item" style="bottom: 120px; left: 25%;" data-magnetic="true">🔑</div>
+    <div class="item" style="bottom: 120px; left: 40%;" data-magnetic="true">🔩</div>
+    <div class="item" style="bottom: 120px; left: 55%;" data-magnetic="true">🪙</div>
+    <div class="item" style="bottom: 120px; left: 70%;" data-magnetic="false">🧶</div>
+    <div class="item" style="bottom: 120px; left: 85%;" data-magnetic="false">✏️</div>
 
     <div class="controls">
-        <button onclick="flipMagnet('mag1')" class="btn-game bg-gradient-to-b from-red-400 to-red-600">اقلب الأحمر</button>
-        <button onclick="flipMagnet('mag2')" class="btn-game bg-gradient-to-b from-blue-400 to-blue-600">اقلب الأزرق</button>
-        <button onclick="window.location.reload()" class="btn-game bg-slate-700">ترتيب المختبر</button>
+        <button onclick="flip('mag1')" class="btn bg-red-600">قلب الأحمر</button>
+        <button onclick="flip('mag2')" class="btn bg-blue-600">قلب الأزرق</button>
+        <button onclick="location.reload()" class="btn bg-slate-800">إعادة ضبط</button>
     </div>
 </div>
 
 <script>
-    const magnets = document.querySelectorAll('.magnet');
-    const items = document.querySelectorAll('.item');
-    const hintText = document.getElementById('hint-text');
-    const container = document.getElementById('game-container');
-    
-    let activeElement = null;
-    let offset = { x: 0, y: 0 };
-    let attachedItems = new Map();
-    let isSnapped = false;
+    let active = null;
+    let dragOffset = { x: 0, y: 0 };
+    const stuckItems = new Map(); // التخزين: Item DOM -> { mag: DOM, dx: num, dy: num }
 
-    function flipMagnet(id) {
-        const mag = document.getElementById(id);
-        const poles = Array.from(mag.children);
-        mag.style.transform = 'scale(0.8) rotateY(90deg)';
+    function flip(id) {
+        const m = document.getElementById(id);
+        const p = Array.from(m.children);
+        m.style.transform = 'scale(0.8) rotateY(90deg)';
         setTimeout(() => {
-            mag.innerHTML = '';
-            mag.appendChild(poles[1]);
-            mag.appendChild(poles[0]);
-            mag.style.transform = 'scale(1) rotateY(0deg)';
-            isSnapped = false;
-            checkPhysics();
+            m.innerHTML = '';
+            m.appendChild(p[1]);
+            m.appendChild(p[0]);
+            m.style.transform = 'scale(1) rotateY(0deg)';
+            updateStuck(m); 
         }, 150);
     }
 
     function onStart(e) {
-        if (e.target.tagName === 'BUTTON') return;
-        const touch = e.touches ? e.touches[0] : e;
+        const t = e.touches ? e.touches[0] : e;
         const target = e.target.closest('.magnet, .item');
         if (!target) return;
-        
-        activeElement = target;
-        isSnapped = false; 
-        const rect = target.getBoundingClientRect();
-        
-        if (target.classList.contains('item') && target.style.position === 'relative') {
-            target.style.position = 'absolute';
-            target.style.left = rect.left + 'px';
-            target.style.top = rect.top + 'px';
+
+        active = target;
+        const r = target.getBoundingClientRect();
+        dragOffset.x = t.clientX - r.left;
+        dragOffset.y = t.clientY - r.top;
+
+        if (stuckItems.has(target)) {
+            target.classList.remove('locked');
+            stuckItems.delete(target);
         }
 
-        offset.x = touch.clientX - rect.left;
-        offset.y = touch.clientY - rect.top;
-        target.style.zIndex = 1000;
-        
-        if (target.classList.contains('item')) {
-            target.classList.remove('attached');
-            attachedItems.delete(target);
-        }
+        active.style.zIndex = 1000;
+        active.classList.remove('shake');
     }
 
     function onMove(e) {
-        if (!activeElement || isSnapped) return;
-        e.preventDefault(); 
-        const touch = e.touches ? e.touches[0] : e;
+        if (!active) return;
+        if (e.cancelable) e.preventDefault();
         
-        let newX = touch.clientX - offset.x;
-        let newY = touch.clientY - offset.y;
-        
-        const maxX = window.innerWidth - activeElement.offsetWidth;
-        const maxY = window.innerHeight - activeElement.offsetHeight;
-        
-        newX = Math.max(0, Math.min(newX, maxX));
-        newY = Math.max(0, Math.min(newY, maxY));
+        const t = e.touches ? e.touches[0] : e;
+        active.style.left = (t.clientX - dragOffset.x) + 'px';
+        active.style.top = (t.clientY - dragOffset.y) + 'px';
 
-        activeElement.style.left = newX + 'px';
-        activeElement.style.top = newY + 'px';
-        
-        if (activeElement.classList.contains('magnet')) {
-            updateAttachedItems(activeElement);
+        if (active.classList.contains('magnet')) {
+            updateStuck(active);
         }
-        checkPhysics();
+        
+        processPhysics();
     }
 
-    function onEnd() {
-        if (!activeElement) return;
-        activeElement.style.zIndex = activeElement.classList.contains('magnet') ? 10 : 5;
-        activeElement = null;
-    }
-
-    function updateAttachedItems(mag) {
-        items.forEach(item => {
-            if (attachedItems.get(item) === mag) {
-                const magRect = mag.getBoundingClientRect();
-                const rel = JSON.parse(item.dataset.relOffset || '{"x":0,"y":0}');
-                item.style.left = (magRect.left + rel.x) + 'px';
-                item.style.top = (magRect.top + rel.y) + 'px';
+    function updateStuck(mag) {
+        const mR = mag.getBoundingClientRect();
+        stuckItems.forEach((data, item) => {
+            if (data.mag === mag) {
+                item.style.left = (mR.left + data.dx) + 'px';
+                item.style.top = (mR.top + data.dy) + 'px';
             }
         });
     }
 
-    function createSpark(x, y) {
-        const spark = document.createElement('div');
-        spark.className = 'spark';
-        spark.style.left = x + 'px';
-        spark.style.top = y + 'px';
-        container.appendChild(spark);
-        setTimeout(() => spark.remove(), 400);
-    }
+    function processPhysics() {
+        const status = document.getElementById('status');
+        const mags = [document.getElementById('mag1'), document.getElementById('mag2')];
+        const items = document.querySelectorAll('.item');
 
-    function checkPhysics() {
-        const mag1 = document.getElementById('mag1');
-        const mag2 = document.getElementById('mag2');
-        const r1 = mag1.getBoundingClientRect();
-        const r2 = mag2.getBoundingClientRect();
-
-        // حساب الأطراف المتقابلة بدقة
-        const mag1Poles = {
-            left: { x: r1.left, y: r1.top + r1.height/2, type: mag1.children[0].innerText },
-            right: { x: r1.right, y: r1.top + r1.height/2, type: mag1.children[1].innerText }
-        };
-        const mag2Poles = {
-            left: { x: r2.left, y: r2.top + r2.height/2, type: mag2.children[0].innerText },
-            right: { x: r2.right, y: r2.top + r2.height/2, type: mag2.children[1].innerText }
-        };
-
-        // تحديد أي طرفين هما الأقرب لبعضهما
-        const pairs = [
-            { d: Math.abs(mag1Poles.right.x - mag2Poles.left.x), p1: mag1Poles.right, p2: mag2Poles.left, side: 'right-left' },
-            { d: Math.abs(mag1Poles.left.x - mag2Poles.right.x), p1: mag1Poles.left, p2: mag2Poles.right, side: 'left-right' }
-        ];
+        const r1 = mags[0].getBoundingClientRect();
+        const r2 = mags[1].getBoundingClientRect();
         
-        // ترتيب المسافات للعثور على الأقرب
-        pairs.sort((a, b) => a.d - b.d);
-        const closest = pairs[0];
-        
-        // التحقق من التقارب الرأسي أيضاً (يجب أن يكونا على نفس المستوى تقريباً)
-        const verticalDist = Math.abs(r1.top - r2.top);
-        const isAligned = verticalDist < r1.height;
+        const dxM = r1.left - r2.left;
+        const dyM = r1.top - r2.top;
+        const distM = Math.sqrt(dxM*dxM + dyM*dyM);
 
-        const threshold = 100;
-        const snapDistance = 40;
+        if (distM < 200) {
+            const p1_right = mags[0].children[1].innerText;
+            const p2_left = mags[1].children[0].innerText;
 
-        if (closest.d < threshold && isAligned) {
-            if (closest.p1.type === closest.p2.type) {
-                // تنافر حقيقي
-                hintText.innerText = "تنافر! الأقطاب المتشابهة تهرب! 💨";
-                const push = 20;
-                if (activeElement === mag1) {
-                    let move = closest.side === 'right-left' ? push : -push;
-                    mag2.style.left = Math.max(0, Math.min(window.innerWidth - r2.width, r2.left + move)) + 'px';
-                } else if (activeElement === mag2) {
-                    let move = closest.side === 'right-left' ? -push : push;
-                    mag1.style.left = Math.max(0, Math.min(window.innerWidth - r1.width, r1.left + move)) + 'px';
+            if (p1_right === p2_left) {
+                mags[0].classList.add('shake');
+                mags[1].classList.add('shake');
+                status.innerText = "أقطاب متشابهة! تنافر حقيقي 💨";
+                if (distM < 160) {
+                    const push = (160 - distM) * 0.4;
+                    if (active === mags[0]) mags[1].style.left = (r2.left + push) + 'px';
+                    else if (active === mags[1]) mags[0].style.left = (r1.left - push) + 'px';
+                    updateStuck(mags[0]); updateStuck(mags[1]);
                 }
-                updateAttachedItems(mag1);
-                updateAttachedItems(mag2);
             } else {
-                // تجاذب حقيقي
-                hintText.innerText = "تجاذب! قوة مذهلة! ❤️";
-                if (closest.d < snapDistance && !isSnapped && activeElement) {
-                    isSnapped = true;
-                    createSpark(closest.p1.x, closest.p1.y);
-                    
-                    if (activeElement === mag1) {
-                        mag2.style.left = (closest.side === 'right-left' ? r1.right : r1.left - r2.width) + 'px';
-                        mag2.style.top = r1.top + 'px';
-                    } else {
-                        mag1.style.left = (closest.side === 'left-right' ? r2.right : r2.left - r1.width) + 'px';
-                        mag1.style.top = r2.top + 'px';
-                    }
-                    onEnd(); 
-                } else if (!isSnapped) {
-                    const pull = 8;
-                    if (activeElement === mag1) {
-                        let move = closest.side === 'right-left' ? -pull : pull;
-                        mag2.style.left = (r2.left + move) + 'px';
-                    } else if (activeElement === mag2) {
-                        let move = closest.side === 'right-left' ? pull : -pull;
-                        mag1.style.left = (r1.left + move) + 'px';
+                mags[0].classList.remove('shake');
+                mags[1].classList.remove('shake');
+                if (distM < 165 && active) {
+                    status.innerText = "أقطاب مختلفة! تجاذب قوي ❤️";
+                    const gap = r2.left - r1.right;
+                    if (Math.abs(r1.top - r2.top) < 40 && Math.abs(gap) < 20) {
+                        if (active === mags[0]) mags[1].style.left = r1.right + 'px';
+                        else mags[0].style.left = (r2.left - r1.width) + 'px';
+                        mags[1].style.top = mags[0].style.top;
+                        updateStuck(mags[0]); updateStuck(mags[1]);
                     }
                 }
-                updateAttachedItems(mag1);
-                updateAttachedItems(mag2);
             }
+        } else {
+            mags[0].classList.remove('shake');
+            mags[1].classList.remove('shake');
         }
 
-        // فيزياء القطع الصغيرة
         items.forEach(item => {
-            if (activeElement === item || item.dataset.magnetic === 'false') return;
-            magnets.forEach(mag => {
-                const itemRect = item.getBoundingClientRect();
-                const magRect = mag.getBoundingClientRect();
-                const d = getDistance(itemRect, magRect);
-                if (d < 80 && !attachedItems.has(item)) {
-                    snapTo(item, mag);
+            if (item === active || item.dataset.magnetic === 'false' || stuckItems.has(item)) return;
+
+            mags.forEach(mag => {
+                const iR = item.getBoundingClientRect();
+                const mR = mag.getBoundingClientRect();
+
+                const dist = Math.sqrt(
+                    Math.pow((iR.left + 32) - (mR.left + 80), 2) +
+                    Math.pow((iR.top + 32) - (mR.top + 30), 2)
+                );
+
+                if (dist < 90) {
+                    item.classList.add('locked');
+                    const snapX = iR.left;
+                    const snapY = mR.top + (mR.height/2 - iR.height/2);
+                    
+                    item.style.left = snapX + 'px';
+                    item.style.top = snapY + 'px';
+
+                    stuckItems.set(item, {
+                        mag: mag,
+                        dx: snapX - mR.left,
+                        dy: snapY - mR.top
+                    });
+                    
+                    status.innerText = "تجاذب معدني! القطعة ملتصقة 🧲";
+                    createSparks(snapX + 30, snapY + 30);
                 }
             });
         });
     }
 
-    function snapTo(item, mag) {
-        item.classList.add('attached');
-        const mR = mag.getBoundingClientRect();
-        const iR = item.getBoundingClientRect();
-        item.dataset.relOffset = JSON.stringify({x: iR.left - mR.left, y: iR.top - mR.top});
-        attachedItems.set(item, mag);
-        createSpark(iR.left + iR.width/2, iR.top + iR.height/2);
+    function createSparks(x, y) {
+        for(let i=0; i<6; i++) {
+            const s = document.createElement('div');
+            s.className = 'sparkle';
+            s.style.left = x + 'px';
+            s.style.top = y + 'px';
+            s.style.setProperty('--dx', (Math.random()*100 - 50) + 'px');
+            s.style.setProperty('--dy', (Math.random()*100 - 50) + 'px');
+            document.body.appendChild(s);
+            setTimeout(() => s.remove(), 500);
+        }
+        if (navigator.vibrate) navigator.vibrate(15);
     }
 
-    function getDistance(r1, r2) {
-        const x1 = r1.left + r1.width/2, y1 = r1.top + r1.height/2;
-        const x2 = r2.left + r2.width/2, y2 = r2.top + r2.height/2;
-        return Math.sqrt(Math.pow(x1-x2, 2) + Math.pow(y1-y2, 2));
+    function onEnd() { 
+        if (active) active.style.zIndex = active.classList.contains('magnet') ? 50 : 10;
+        active = null; 
     }
 
     window.addEventListener('mousedown', onStart);
@@ -390,6 +332,12 @@
     window.addEventListener('touchstart', onStart, {passive: false});
     window.addEventListener('touchmove', onMove, {passive: false});
     window.addEventListener('touchend', onEnd);
+
+    function syncLoop() {
+        document.querySelectorAll('.magnet').forEach(updateStuck);
+        requestAnimationFrame(syncLoop);
+    }
+    syncLoop();
 </script>
 </body>
 </html>
